@@ -1,0 +1,19 @@
+# Generated game binaries and build artifacts
+*.gba
+*.elf
+*.sym
+*.sav
+*.ss*
+*.state
+*.bios
+*.bin
+*.o
+*.d
+dist/
+vendor/
+__pycache__/
+*.pyc
+
+# Local logs and private campaign data
+*.log
+*.bak
