@@ -11,6 +11,7 @@ Modificação comunitária de Pokémon FireRed para duas instâncias independent
 - Duelos individuais: cada jogador controla seu Pokémon, pode trocar e escolher golpes. Vitória, derrota e desistência retornam ao mapa; o duelo PvP não dá experiência e restaura as equipes ao estado anterior.
 - Convite para cooperar em encontros selvagens e batalhas de treinadores suportadas. O alcance atual para encontro selvagem é de **10 blocos**. Cada pessoa escolhe e controla seus Pokémon; HP, PP, itens, captura e experiência são aplicados à campanha/proprietário correspondente.
 - Cancelamento da espera com **B do GBA** (tecla **X** no mapeamento usado nos testes), com limite de 30 segundos emulados.
+- No início da campanha, Oak pergunta se você prefere o modo clássico ou três iniciais aleatórios. No modo aleatório, as três Pokébolas recebem espécies válidas diferentes da Pokédex interna do FireRed; você vê o nome e o sprite de cada uma antes de confirmar.
 - Validação de compatibilidade da ROM entre as duas pontas e reconexão após carregar save state, seguindo o passo a passo abaixo.
 
 O visitante pode atravessar o personagem e alguns estados visuais especiais não são sincronizados. O jogo foi testado em duas instâncias locais do mGBA; a conexão Hamachi depende da rede/firewall de cada computador.

@@ -25,6 +25,95 @@ index 88d7594..f580f40 100644
  	.include "data/text/new_game_intro.inc"
  	.include "data/text/pokedude.inc"
 +	.include "data/scripts/multiplayer.inc"
+diff --git a/data/maps/PalletTown_ProfessorOaksLab/scripts.inc b/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
+index 90adf86..677146d 100644
+--- a/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
++++ b/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
+@@ -222,6 +222,16 @@ PalletTown_ProfessorOaksLab_ChooseStarterScene::
+ 	waitmovement 0
+ 	msgbox PalletTown_ProfessorOaksLab_Text_RivalNoFairWhatAboutMe
+ 	msgbox PalletTown_ProfessorOaksLab_Text_OakBePatientRival
++	msgbox PalletTown_ProfessorOaksLab_Text_OakRandomStarterQuestion, MSGBOX_YESNO
++	goto_if_eq VAR_RESULT, YES, PalletTown_ProfessorOaksLab_EventScript_EnableRandomStarters
++	setvar VAR_STARTER_RANDOMIZER_MODE, 0
++	goto PalletTown_ProfessorOaksLab_EventScript_StarterModeSelected
++
++PalletTown_ProfessorOaksLab_EventScript_EnableRandomStarters::
++	setvar VAR_STARTER_RANDOMIZER_MODE, 1
++	special RandomizeStarterChoices
++
++PalletTown_ProfessorOaksLab_EventScript_StarterModeSelected::
+ 	setvar VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 2
+ 	releaseall
+ 	end
+@@ -1071,6 +1081,7 @@ PalletTown_ProfessorOaksLab_EventScript_BulbasaurBall::
+ 	faceplayer
+ 	setvar PLAYER_STARTER_NUM, 0
+ 	setvar PLAYER_STARTER_SPECIES, SPECIES_BULBASAUR
++	call_if_eq VAR_STARTER_RANDOMIZER_MODE, 1, PalletTown_ProfessorOaksLab_EventScript_ApplyRandomStarterSpecies
+ 	setvar RIVAL_STARTER_SPECIES, SPECIES_CHARMANDER
+ 	setvar RIVAL_STARTER_ID, LOCALID_CHARMANDER_BALL
+ 	goto_if_ge VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3, PalletTown_ProfessorOaksLab_EventScript_LastPokeBall
+@@ -1084,11 +1095,24 @@ PalletTown_ProfessorOaksLab_EventScript_ConfirmStarterChoice::
+ 	waitmovement 0
+ 	showmonpic PLAYER_STARTER_SPECIES, 10, 3
+ 	textcolor NPC_TEXT_COLOR_MALE
++	goto_if_eq VAR_STARTER_RANDOMIZER_MODE, 1, PalletTown_ProfessorOaksLab_EventScript_ConfirmRandomStarter
+ 	goto_if_eq PLAYER_STARTER_NUM, 0, PalletTown_ProfessorOaksLab_EventScript_ConfirmBulbasaur
+ 	goto_if_eq PLAYER_STARTER_NUM, 1, PalletTown_ProfessorOaksLab_EventScript_ConfirmSquirtle
+ 	goto_if_eq PLAYER_STARTER_NUM, 2, PalletTown_ProfessorOaksLab_EventScript_ConfirmCharmander
+ 	end
+ 
++PalletTown_ProfessorOaksLab_EventScript_ConfirmRandomStarter::
++	bufferspeciesname STR_VAR_1, PLAYER_STARTER_SPECIES
++	msgbox PalletTown_ProfessorOaksLab_Text_OakConfirmRandomStarter, MSGBOX_YESNO
++	goto_if_eq VAR_RESULT, YES, PalletTown_ProfessorOaksLab_EventScript_ChoseStarter
++	goto_if_eq VAR_RESULT, NO, PalletTown_ProfessorOaksLab_EventScript_DeclinedStarter
++	end
++
++PalletTown_ProfessorOaksLab_EventScript_ApplyRandomStarterSpecies::
++	setvar VAR_0x8004, PLAYER_STARTER_NUM
++	specialvar PLAYER_STARTER_SPECIES, GetRandomStarterSpecies
++	return
++
+ PalletTown_ProfessorOaksLab_EventScript_ConfirmBulbasaur::
+ 	msgbox PalletTown_ProfessorOaksLab_Text_OakChoosingBulbasaur, MSGBOX_YESNO
+ 	goto_if_eq VAR_RESULT, YES, PalletTown_ProfessorOaksLab_EventScript_ChoseStarter
+@@ -1214,6 +1238,7 @@ PalletTown_ProfessorOaksLab_EventScript_SquirtleBall::
+ 	faceplayer
+ 	setvar PLAYER_STARTER_NUM, 1
+ 	setvar PLAYER_STARTER_SPECIES, SPECIES_SQUIRTLE
++	call_if_eq VAR_STARTER_RANDOMIZER_MODE, 1, PalletTown_ProfessorOaksLab_EventScript_ApplyRandomStarterSpecies
+ 	setvar RIVAL_STARTER_SPECIES, SPECIES_BULBASAUR
+ 	setvar RIVAL_STARTER_ID, LOCALID_BULBASAUR_BALL
+ 	goto_if_ge VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3, PalletTown_ProfessorOaksLab_EventScript_LastPokeBall
+@@ -1227,6 +1252,7 @@ PalletTown_ProfessorOaksLab_EventScript_CharmanderBall::
+ 	faceplayer
+ 	setvar PLAYER_STARTER_NUM, 2
+ 	setvar PLAYER_STARTER_SPECIES, SPECIES_CHARMANDER
++	call_if_eq VAR_STARTER_RANDOMIZER_MODE, 1, PalletTown_ProfessorOaksLab_EventScript_ApplyRandomStarterSpecies
+ 	setvar RIVAL_STARTER_SPECIES, SPECIES_SQUIRTLE
+ 	setvar RIVAL_STARTER_ID, LOCALID_SQUIRTLE_BALL
+ 	goto_if_ge VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3, PalletTown_ProfessorOaksLab_EventScript_LastPokeBall
+diff --git a/data/maps/PalletTown_ProfessorOaksLab/text.inc b/data/maps/PalletTown_ProfessorOaksLab/text.inc
+index 849a643..0415cf4 100644
+--- a/data/maps/PalletTown_ProfessorOaksLab/text.inc
++++ b/data/maps/PalletTown_ProfessorOaksLab/text.inc
+@@ -89,6 +89,14 @@ PalletTown_ProfessorOaksLab_Text_OakBePatientRival::
+     .string "OAK: Be patient, {RIVAL}.\n"
+     .string "You can have one, too!$"
+ 
++PalletTown_ProfessorOaksLab_Text_OakRandomStarterQuestion::
++    .string "OAK: Would you like three random\n"
++    .string "POKéMON to choose from?$"
++
++PalletTown_ProfessorOaksLab_Text_OakConfirmRandomStarter::
++    .string "OAK: You chose {STR_VAR_1}.\n"
++    .string "Do you want this POKéMON?$"
++
+ PalletTown_ProfessorOaksLab_Text_OakWhichOneWillYouChoose::
+     .string "OAK: Now, {PLAYER}.\p"
+     .string "Inside those three POKé BALLS are\n"
 diff --git a/data/scripts/multiplayer.inc b/data/scripts/multiplayer.inc
 new file mode 100644
 index 0000000..675abce
@@ -250,10 +339,19 @@ index 0000000..675abce
 +	.string "Seu amigo esta indisponivel.\n"
 +	.string "Fique ao lado dele e tente de novo.$"
 diff --git a/data/specials.inc b/data/specials.inc
-index d880bf6..fed7603 100644
+index d880bf6..59a2b42 100644
 --- a/data/specials.inc
 +++ b/data/specials.inc
-@@ -452,4 +452,20 @@ gSpecials::
+@@ -363,6 +363,8 @@ gSpecials::
+ 	def_special CloseElevatorCurrentFloorWindow
+ 	def_special ForcePlayerToStartSurfing
+ 	def_special GetStarterSpecies
++	def_special RandomizeStarterChoices
++	def_special GetRandomStarterSpecies
+ 	def_special SetSeenMon
+ 	def_special VsSeekerResetObjectMovementAfterChargeComplete
+ 	def_special ShouldShowBoxWasFullMessage
+@@ -452,4 +454,20 @@ gSpecials::
  	def_special UpdateLoreleiDollCollection
  	def_special LoopWingFlapSound
  	def_special CreateEnemyEventMon
@@ -286,6 +384,35 @@ index d5866c5..ad0b32a 100644
  void BattleMainCB2(void);
  void FreeRestoreBattleData(void);
  void VBlankCB_Battle(void);
+diff --git a/include/constants/vars.h b/include/constants/vars.h
+index 5c7bbf8..6f68d0c 100644
+--- a/include/constants/vars.h
++++ b/include/constants/vars.h
+@@ -99,6 +99,11 @@
+ #define VAR_RESET_RTC_ENABLE               0x4032
+ #define VAR_ENIGMA_BERRY_AVAILABLE         0x4033
+ 
++#define VAR_STARTER_RANDOMIZER_MODE        0x4029
++#define VAR_RANDOM_STARTER_1               0x402A
++#define VAR_RANDOM_STARTER_2               0x402B
++#define VAR_RANDOM_STARTER_3               0x402C
++
+ #define VAR_0x4034                         0x4034
+ #define VAR_RESORT_GOREGEOUS_STEP_COUNTER  0x4035
+ #define VAR_RESORT_GORGEOUS_REQUESTED_MON  0x4036
+diff --git a/include/field_specials.h b/include/field_specials.h
+index b5d1f5c..97edd49 100644
+--- a/include/field_specials.h
++++ b/include/field_specials.h
+@@ -7,6 +7,8 @@ u8 GetLeadMonIndex(void);
+ s32 CountDigits(s32 number);
+ void TV_PrintIntToStringVar(u8 varidx, s32 number);
+ u16 GetStarterSpecies(void);
++void RandomizeStarterChoices(void);
++u16 GetRandomStarterSpecies(void);
+ void StopPokemonLeagueLightingEffectTask(void);
+ void FieldCB_ShowPortholeView(void);
+ u8 ContextNpcGetTextColor(void);
 diff --git a/include/malloc.h b/include/malloc.h
 index bf89bad..21dc27a 100644
 --- a/include/malloc.h
@@ -3129,6 +3256,59 @@ index b1b6465..c02906b 100644
 +
      if (InUnionRoom() == TRUE && !ObjectEventCheckHeldMovementStatus(&gObjectEvents[objectEventId]))
          return NULL;
+ 
+diff --git a/src/field_specials.c b/src/field_specials.c
+index 08b7ced..6bd433d 100644
+--- a/src/field_specials.c
++++ b/src/field_specials.c
+@@ -1522,10 +1522,48 @@ static const u16 sStarterSpecies[] = {
+     SPECIES_CHARMANDER
+ };
+ 
++static u16 GetRandomStarterChoice(u16 idx)
++{
++    if (idx >= 3)
++        idx = 0;
++    return VarGet(VAR_RANDOM_STARTER_1 + idx);
++}
++
++void RandomizeStarterChoices(void)
++{
++    u16 choices[3];
++    u16 species;
++    u8 i, j;
++
++    for (i = 0; i < ARRAY_COUNT(choices); i++)
++    {
++        do
++        {
++            // Species 1..NUM_SPECIES - 1 are valid Pokémon; NUM_SPECIES is Egg.
++            species = (Random() % (NUM_SPECIES - 1)) + 1;
++            for (j = 0; j < i && choices[j] != species; j++)
++                ;
++        } while (j < i);
++        choices[i] = species;
++        VarSet(VAR_RANDOM_STARTER_1 + i, species);
++    }
++}
++
++u16 GetRandomStarterSpecies(void)
++{
++    return GetRandomStarterChoice(gSpecialVar_0x8004);
++}
++
+ static u16 GetStarterSpeciesById(u16 idx)
+ {
+     if (idx >= NELEMS(sStarterSpecies))
+         idx = 0;
++    if (VarGet(VAR_STARTER_RANDOMIZER_MODE) == 1)
++    {
++        u16 species = GetRandomStarterChoice(idx);
++        if (species > SPECIES_NONE && species < NUM_SPECIES)
++            return species;
++    }
+     return sStarterSpecies[idx];
+ }
  
 diff --git a/src/item_use.c b/src/item_use.c
 index 954f482..fc61f79 100644
