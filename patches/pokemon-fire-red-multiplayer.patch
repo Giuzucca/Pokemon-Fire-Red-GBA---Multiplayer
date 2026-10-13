@@ -26,7 +26,7 @@ index 88d7594..f580f40 100644
  	.include "data/text/pokedude.inc"
 +	.include "data/scripts/multiplayer.inc"
 diff --git a/data/maps/PalletTown_ProfessorOaksLab/scripts.inc b/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
-index 90adf86..677146d 100644
+index 90adf86..16f6dbe 100644
 --- a/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
 +++ b/data/maps/PalletTown_ProfessorOaksLab/scripts.inc
 @@ -222,6 +222,16 @@ PalletTown_ProfessorOaksLab_ChooseStarterScene::
@@ -72,7 +72,7 @@ index 90adf86..677146d 100644
 +	end
 +
 +PalletTown_ProfessorOaksLab_EventScript_ApplyRandomStarterSpecies::
-+	setvar VAR_0x8004, PLAYER_STARTER_NUM
++	copyvar VAR_0x8004, PLAYER_STARTER_NUM
 +	specialvar PLAYER_STARTER_SPECIES, GetRandomStarterSpecies
 +	return
 +
