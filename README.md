@@ -6,10 +6,10 @@ Modificação comunitária de Pokémon FireRed para duas instâncias independent
 
 ## Versões e downloads
 
-As versões estão disponíveis na aba [Releases](https://github.com/Giuzucca/Pokemon-Fire-Red-GBA---Multiplayer/releases). Cada release tem o código-fonte compactado pelo GitHub e um arquivo `.patch` que pode ser aplicado sobre a revisão compatível de `pret/pokefirered` indicada neste README.
+As versões estão marcadas por tags no GitHub. Os links abaixo baixam o código-fonte de cada versão em ZIP; o arquivo `.patch` fica dentro de `patches/` no ZIP.
 
-- [v6.0.0 — recomendada](https://github.com/Giuzucca/Pokemon-Fire-Red-GBA---Multiplayer/releases/tag/v6.0.0): corrige o índice usado ao consultar os iniciais aleatórios. As três Pokébolas mostram espécies diferentes.
-- [v5.0.0 — versão anterior](https://github.com/Giuzucca/Pokemon-Fire-Red-GBA---Multiplayer/releases/tag/v5.0.0): inclui a escolha de iniciais aleatórios, mas pode repetir a mesma espécie nas Pokébolas. Está mantida como versão histórica para baixar e comparar.
+- [v6.0.0 — recomendada, baixar ZIP](https://github.com/Giuzucca/Pokemon-Fire-Red-GBA---Multiplayer/archive/refs/tags/v6.0.0.zip): corrige o índice usado ao consultar os iniciais aleatórios. As três Pokébolas mostram espécies diferentes.
+- [v5.0.0 — versão anterior, baixar ZIP](https://github.com/Giuzucca/Pokemon-Fire-Red-GBA---Multiplayer/archive/refs/tags/v5.0.0.zip): inclui a escolha de iniciais aleatórios, mas pode repetir a mesma espécie nas Pokébolas. Está mantida como versão histórica para baixar e comparar.
 
 Os downloads contêm código e patch, **não uma ROM pronta**. Para jogar, cada pessoa precisa fornecer sua própria ROM legal de FireRed (EUA, revisão 1.0) e compilar localmente conforme os passos abaixo. Não distribua ROM compilada, BIOS, saves ou save states.
 
