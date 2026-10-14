@@ -1,3 +1,91 @@
+-- Generated for FireRed-MP. Change only ip/port for your private network.
+local CONFIG = {role="host", ip="127.0.0.1", port=4096, mailbox=0x0203e924, sendBuffer=0x02021618, recvBuffer=0x02021118, build="c94da68cd0fb29f95fc0233c01b7c60609e96aa4b02f37c2ede2e6e1b25c04bd", crc32="b6ec4e1b"}
+local Protocol = (function()
+-- Framed, bounded transport for the FireRed presence prototype. No save data.
+local P = { VERSION = 3, MAX_LINE = 600, MAX_BUFFER = 8192 }
+
+function P.hello(build)
+    assert(build:match('^[0-9a-f]+$') and #build == 64)
+    return 'HELLO 3 ' .. build .. '\n'
+end
+
+function P.position(seq, s)
+    local inviteState, invitation = s.inviteState, s.invitation
+    -- A restored state or an older ROM can leave an invitation id behind
+    -- while the invitation state is idle. Presence must not kill the socket.
+    if inviteState == 0 or invitation == 0 then
+        inviteState, invitation = 0, 0
+    end
+    return ('P %d %d %d %d %d %d %d %d %d %d %d %d %d\n'):format(
+        seq, s.mapGroup, s.mapNum, s.x, s.y, s.direction,
+        s.elevation, s.gender, s.ready, inviteState, invitation, s.duelPhase, s.duelId)
+end
+
+function P.block(session, seq, hex)
+    return ('D %d %d %s\n'):format(session, seq, hex)
+end
+function P.ack(session, seq)
+    return ('A %d %d\n'):format(session, seq)
+end
+
+function P.parse(line)
+    if #line > P.MAX_LINE then return nil, 'mensagem longa' end
+    local version, build = line:match('^HELLO (%d+) ([0-9a-f]+)$')
+    if version then
+        if version ~= '3' or #build ~= 64 then return nil, 'versao invalida' end
+        return { kind = 'hello', build = build }
+    end
+    local session, seq, hex = line:match('^D (%d+) (%d+) ([0-9a-f]+)$')
+    local kind = 'block'
+    if not session then session,seq = line:match('^A (%d+) (%d+)$'); kind='ack' end
+    if session then
+        session,seq=tonumber(session),tonumber(seq)
+        if session < 1 or session > 2147483647 or seq < 1 or seq > 2147483647
+            or (hex and (#hex%2 ~= 0 or #hex < 2 or #hex > 512)) then
+            return nil,'bloco invalido'
+        end
+        return {kind=kind,session=session,seq=seq,hex=hex}
+    end
+    local values = { line:match('^P (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d+)$') }
+    if #values ~= 13 then return nil, 'mensagem invalida' end
+    local limits = {2147483647, 255, 255, 1023, 1023, 4, 15, 1, 1, 9, 2147483647, 4, 2147483647}
+    for i, v in ipairs(values) do
+        v = tonumber(v)
+        if not v or v > limits[i] then return nil, 'campo fora do limite' end
+        values[i] = v
+    end
+    if values[6] < 1 then return nil, 'direcao invalida' end
+    if values[10] == 0 or values[11] == 0 then
+        values[10], values[11] = 0, 0
+    end
+    if (values[12] == 0) ~= (values[13] == 0) then return nil, 'duelo invalido' end
+    return {kind='position', seq=values[1], mapGroup=values[2], mapNum=values[3],
+        x=values[4], y=values[5], direction=values[6], elevation=values[7],
+        gender=values[8], ready=values[9], inviteState=values[10], invitation=values[11],
+        duelPhase=values[12],duelId=values[13]}
+end
+
+function P.feed(buffer, chunk)
+    if type(chunk) ~= 'string' or #buffer + #chunk > P.MAX_BUFFER then
+        return nil, nil, 'buffer excedido'
+    end
+    buffer = buffer .. chunk
+    local messages = {}
+    while true do
+        local eol = buffer:find('\n', 1, true)
+        if not eol then break end
+        local msg, err = P.parse(buffer:sub(1, eol - 1))
+        if not msg then return nil, nil, err end
+        messages[#messages + 1] = msg
+        buffer = buffer:sub(eol + 1)
+    end
+    if #buffer > P.MAX_LINE then return nil, nil, 'linha sem terminador' end
+    return buffer, messages
+end
+
+return P
+
+end)()
 -- CONFIG and Protocol are prepended by package.py; this is a standalone mGBA script.
 if FRMP_STOP then FRMP_STOP() end
 local address = CONFIG.mailbox
@@ -9,9 +97,13 @@ local sequence, received, frame = 0, -1, 0
 -- game-side frame so a restored mailbox can invalidate old TCP sequence data.
 local lastGameFrame
 local lastReceive = os.time()
+-- Give slow emulators and fast-forward scheduling room to catch up before
+-- treating an otherwise-open TCP peer as disconnected.
+local TCP_IDLE_TIMEOUT_SECONDS = 30
 local frameCallback, resetCallback, shutdownCallback
 local blocks = {}
 local rxSession, rxBlock, txSession, txBlock = 0, 0, 0, 0
+local MAX_PENDING_BATTLE_BLOCKS = 30
 
 local function log(s) console:log('[FireRed MP] ' .. s) end
 local function validMailbox()
@@ -104,7 +196,7 @@ local function process(msg)
         elseif msg.session == emu:read32(address+44) and emu:read8(address+52) >= 4
             and emu:read8(address+52) <= 7 and not (msg.session == duel and emu:read8(address+74) == 4) then
             if rxSession ~= msg.session then rxSession,rxBlock=msg.session,0; blocks={} end
-            if msg.seq ~= rxBlock+1 or #blocks >= 16 then drop('Sequencia de blocos invalida.'); return false end
+            if msg.seq ~= rxBlock+1 or #blocks >= MAX_PENDING_BATTLE_BLOCKS then drop('Sequencia de blocos invalida.'); return false end
             rxBlock=msg.seq
             blocks[#blocks+1]=msg
         end
@@ -198,7 +290,7 @@ local function tick()
         input = pending
         for _,msg in ipairs(messages) do if not process(msg) then return end end
     end
-    if os.time()-lastReceive > 8 then drop('Conexao expirou. Execute FRMP_CONNECT() para reconectar.'); return end
+    if os.time()-lastReceive > TCP_IDLE_TIMEOUT_SECONDS then drop('Conexao expirou. Execute FRMP_CONNECT() para reconectar.'); return end
     if authenticated then pumpBattle(); if not peer then return end end
     if authenticated and frame%4 == 0 then
         sequence = sequence+1

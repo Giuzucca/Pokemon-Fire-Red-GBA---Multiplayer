@@ -1,4 +1,5 @@
 param(
+    [string]$ROMBase,
     [string]$IPHost = '127.0.0.1',
     [ValidateRange(1024,65535)][int]$Porta = 4096,
     [switch]$DetectHamachi
@@ -20,6 +21,40 @@ if ($parsedIP.AddressFamily -ne [System.Net.Sockets.AddressFamily]::InterNetwork
 $IPHost = $parsedIP.ToString()
 $rom = Join-Path $PSScriptRoot 'FireRed-MP.gba'
 $manifest = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'manifest.json') -Raw | ConvertFrom-Json
+if (-not (Test-Path -LiteralPath $rom)) {
+    if (-not $ROMBase) {
+        throw 'Informe -ROMBase com sua ROM original FireRed USA 1.0 para gerar a ROM multiplayer.'
+    }
+    $baseHash = (Get-FileHash -LiteralPath $ROMBase -Algorithm SHA1).Hash.ToLowerInvariant()
+    if ($baseHash -ne '41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc') {
+        throw 'ROM base incompativel. Necessaria FireRed USA revisao 1.0 (SHA-1 41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc).'
+    }
+    $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $ROMBase))
+    $patch = [System.IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'FireRed-MP-v9.ips'))
+    if ([System.Text.Encoding]::ASCII.GetString($patch, 0, 5) -ne 'PATCH') { throw 'Patch IPS invalido.' }
+    $pos = 5
+    while ($pos + 3 -le $patch.Length) {
+        if ([System.Text.Encoding]::ASCII.GetString($patch, $pos, 3) -eq 'EOF') {
+            $pos += 3
+            break
+        }
+        if ($pos + 5 -gt $patch.Length) { throw 'Patch IPS incompleto.' }
+        $offset = ([int]$patch[$pos] -shl 16) -bor ([int]$patch[$pos + 1] -shl 8) -bor [int]$patch[$pos + 2]
+        $length = ([int]$patch[$pos + 3] -shl 8) -bor [int]$patch[$pos + 4]
+        $pos += 5
+        if ($length -eq 0 -or $pos + $length -gt $patch.Length -or $offset + $length -gt $bytes.Length) {
+            throw 'Patch IPS corrompido ou fora dos limites da ROM.'
+        }
+        [Array]::Copy($patch, $pos, $bytes, $offset, $length)
+        $pos += $length
+    }
+    if ($pos -ne $patch.Length) { throw 'Patch IPS sem terminador valido.' }
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try { $builtHash = [BitConverter]::ToString($sha.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+    if ($builtHash -ne $manifest.sha256) { throw 'A ROM gerada nao corresponde a v9 esperada.' }
+    [System.IO.File]::WriteAllBytes($rom, $bytes)
+}
 if ((Get-FileHash -LiteralPath $rom -Algorithm SHA256).Hash.ToLowerInvariant() -ne $manifest.sha256) {
     throw 'ROM diferente do manifesto. Gere novamente o pacote completo.'
 }

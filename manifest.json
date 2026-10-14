@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "stage": "duel-wild-trainer-rematch-coop",
+  "sha256": "c94da68cd0fb29f95fc0233c01b7c60609e96aa4b02f37c2ede2e6e1b25c04bd",
+  "crc32": "b6ec4e1b",
+  "mailbox": 33810724,
+  "port": 4096,
+  "ip": "127.0.0.1",
+  "sendBuffer": 33691160,
+  "recvBuffer": 33689880
+}
