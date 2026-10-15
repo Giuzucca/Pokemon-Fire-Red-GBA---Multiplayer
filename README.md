@@ -6,6 +6,8 @@ Dois jogadores, cada um em seu mGBA e com campanha própria, podem se encontrar 
 
 Baixe o ZIP desta versão pelo GitHub e extraia tudo em uma pasta. O repositório contém o patch e os scripts Lua, mas não contém a ROM original, saves ou o emulador. Cada jogador precisa de sua própria cópia de **Pokémon FireRed USA, revisão 1.0**, com SHA-1 `41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc`. Traduções, FireRed 1.1 e outras ROM hacks não servem como base.
 
+Para conferir uma ROM que você já possui, execute `Get-FileHash "C:\caminho\sua-rom.gba" -Algorithm SHA1` no PowerShell. Compare o resultado com o SHA-1 acima: o nome do arquivo, sozinho, não confirma a versão. O arquivo `1636 - Pokemon Fire Red (U)(Squirrels).gba` testado neste projeto correspondeu a esse SHA-1, mas outras cópias com esse nome ainda precisam ser conferidas. Este projeto distribui somente o patch; obtenha a ROM por meios autorizados.
+
 Instale o [mGBA 0.10.5](https://mgba.io/downloads.html) com suporte a Lua nos dois computadores. Se o menu **Tools/Ferramentas → Scripting** não existir, essa instalação do mGBA não tem o recurso necessário.
 
 ## Preparar para jogar no mesmo computador
