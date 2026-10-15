@@ -4,7 +4,7 @@ Dois jogadores, cada um em seu mGBA e com campanha própria, podem se encontrar 
 
 ## O que baixar
 
-Baixe o ZIP desta versão pelo GitHub e extraia tudo em uma pasta. O repositório contém o patch v9 e os scripts Lua, mas não contém a ROM original, saves ou o emulador. Cada jogador precisa de sua própria cópia de **Pokémon FireRed USA, revisão 1.0**, com SHA-1 `41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc`. Traduções, FireRed 1.1 e outras ROM hacks não servem como base.
+Baixe o ZIP desta versão pelo GitHub e extraia tudo em uma pasta. O repositório contém o patch e os scripts Lua, mas não contém a ROM original, saves ou o emulador. Cada jogador precisa de sua própria cópia de **Pokémon FireRed USA, revisão 1.0**, com SHA-1 `41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc`. Traduções, FireRed 1.1 e outras ROM hacks não servem como base.
 
 Instale o [mGBA 0.10.5](https://mgba.io/downloads.html) com suporte a Lua nos dois computadores. Se o menu **Tools/Ferramentas → Scripting** não existir, essa instalação do mGBA não tem o recurso necessário.
 
