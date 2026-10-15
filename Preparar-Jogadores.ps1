@@ -33,7 +33,7 @@ if (-not (Test-Path -LiteralPath $rom)) {
         throw 'ROM base incompativel. Necessaria FireRed USA revisao 1.0 (SHA-1 41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc).'
     }
     $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $ROMBase))
-    $patch = [System.IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'FireRed-MP-v9.ips'))
+    $patch = [System.IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'FireRed-MP.ips'))
     if ([System.Text.Encoding]::ASCII.GetString($patch, 0, 5) -ne 'PATCH') { throw 'Patch IPS invalido.' }
     $pos = 5
     while ($pos + 3 -le $patch.Length) {

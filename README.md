@@ -18,7 +18,7 @@ Abra o PowerShell na pasta extraída e execute, substituindo o caminho pela loca
 
 O caminho entre aspas é apenas um exemplo. Confira o local real do arquivo `.gba` no Explorador de Arquivos e use **Copiar como caminho**. O arquivo precisa existir; `mGBA.exe` é o emulador, não a ROM do jogo.
 
-O preparador confere a ROM original, aplica `FireRed-MP-v9.ips`, verifica o resultado e cria pastas separadas `host` e `client`. Ele preserva saves existentes. Não misture ROM ou Lua de versões diferentes.
+O preparador confere a ROM original, aplica `FireRed-MP.ips`, verifica o resultado e cria pastas separadas `host` e `client`. Ele preserva saves existentes. Não misture ROM ou Lua de versões diferentes.
 
 1. Abra `host\FireRed-MP-host.gba` na primeira janela do mGBA. Em **Tools/Ferramentas → Scripting → Load script**, carregue `host\Multiplayer.lua`.
 2. Abra `client\FireRed-MP-client.gba` na segunda janela e carregue `client\Multiplayer.lua`.
