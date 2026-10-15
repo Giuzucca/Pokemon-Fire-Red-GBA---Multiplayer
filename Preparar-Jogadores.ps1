@@ -25,6 +25,9 @@ if (-not (Test-Path -LiteralPath $rom)) {
     if (-not $ROMBase) {
         throw 'Informe -ROMBase com sua ROM original FireRed USA 1.0 para gerar a ROM multiplayer.'
     }
+    if (-not (Test-Path -LiteralPath $ROMBase -PathType Leaf)) {
+        throw "ROM base nao encontrada em '$ROMBase'. Informe o caminho completo de um arquivo .gba existente."
+    }
     $baseHash = (Get-FileHash -LiteralPath $ROMBase -Algorithm SHA1).Hash.ToLowerInvariant()
     if ($baseHash -ne '41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc') {
         throw 'ROM base incompativel. Necessaria FireRed USA revisao 1.0 (SHA-1 41cb23d8dccc8ebd7c649cd8fbb58eeace6e2fdc).'
